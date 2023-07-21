@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Búsqueda de Dominios</title>
+    <style>
+      
+          /* Estilo para los divs que contienen los resultados de búsqueda */
+          .name {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .term {
+            font-weight: bold;
+        }
+
+        .ext {
+            color: #666;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Estilo para el formulario de búsqueda */
+        #domainSearchForm {
+            margin: 20px 0;
+        }
+
+        /* Nueva clase para los campos de texto */
+        .form_input {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            height: auto !important; /* Ajustar automáticamente la altura */
+            box-sizing: border-box; /* Incluir padding y borde en el cálculo de la altura */
+            width: auto; /* Ancho inicial */
+        }
+
+        .search_domain_btn {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* Estilos para los botones */
+        .action-button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .action-button.transladar {
+            background-color: #00cc00;
+            color: #fff;
+            border: none;
+        }
+
+          /* Estilos para el botón "Ver" */
+          .action-button.ver {
+            background-color: #ffa500;
+            color: #fff;
+            border: none;
+        }
+
+        .action-button.registrar {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+
+        /* Estilos del menú */
+        #menu {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+        }
+
+        #menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #menu ul li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        #menu ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+        }
+
+        #menu ul li a:hover {
+            background-color: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+        }
+
+        
+
+        /* Estilos para el formulario de búsqueda y resultados */
+        /* ... (resto de los estilos) ... */
+      
+ /* Estilos para la tabla */
+ table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Menú -->
+    <div id="menu">
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Dominios</a></li>
+            <li><a href="#">Hosting</a></li>
+            <li><a href="#">Servidores</a></li>
+            <li><a href="#">Correo</a></li>
+            <li><a href="#">Soporte</a></li>
+            <li><a href="#">Acceso Clientes</a></li>
+        </ul>
+    </div>
+
+    <!-- Formulario de búsqueda -->
+    <form id="domainSearchForm">
+        <!--   <input type="text" class="search_domain_field" placeholder="acceder a domain" id="sld-com1"> --->
+        <input type="text" class="search_domain_field" placeholder="buscar dominio" id="sld-com2">
+
+          <!-- <button type="button" class="search_domain_btn" name="buton1" onclick="getAndShowDomain(1)">Buscar ingresado en el texto sld-com1</button> --->
+
+        <button type="button" class="search_domain_btn" name="buton2" onclick="getAndShowDomain(2)">Buscar ingresado en el texto</button>
+
+        <button type="button" class="search_domain_btn" name="but" onclick="getAllDomains()">Ver todos</button>
+    </form>
+
+    <!-- Resultado de búsqueda -->
+    <div id="errorDiv" style="color: red; display: none;"></div>
+    <div id="searchResult"></div>
+
+  
+
+<script>
+    // Función para obtener y mostrar los dominios
+    function getAndShowDomain(option) {
+    var domain;
+    if (option === 1) {
+        domain = document.getElementById("sld-com1").value;
+    } else if (option === 2) {
+        domain = document.getElementById("sld-com2").value;
+    } else {
+        return;
+    }
+
+    if (domain.trim() === "") {
+        // Mostramos el mensaje de error en el div
+        document.getElementById("errorDiv").innerText = "Por favor, ingresa un dominio válido antes de buscar.";
+        document.getElementById("errorDiv").style.display = "block";
+        return;
+    }
+
+    // Si los campos son válidos, ocultamos el div de error y procedemos con la búsqueda
+    document.getElementById("errorDiv").style.display = "none";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "archivo.php?domain" + (option === 2 ? "2" : "") + "=" + encodeURIComponent(domain), true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                //document.getElementById("searchResult").innerHTML = xhr.responseText;
+                var jsonData = JSON.parse(xhr.responseText.replace("domain2", ""));
+                document.getElementById("searchResult").innerHTML = generateTable(jsonData);
+                console.log(xhr.responseText);
+            } else {
+                document.getElementById("searchResult").innerHTML = "Ha ocurrido un error en la búsqueda.";
+            }
+        }
+    };
+    xhr.send();
+}
+
+
+    // Evento cuando se hace clic en el botón "Ver todos"
+    function getAllDomains() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "archivo.php?but=true", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                   // document.getElementById("searchResult").innerHTML = xhr.responseText;
+                   var jsonData = JSON.parse(xhr.responseText.replace("aacbut", ""));
+                        document.getElementById("searchResult").innerHTML = generateTable(jsonData);
+                        console.log(xhr.responseText);
+
+                } else {
+                    document.getElementById("searchResult").innerHTML = "Ha ocurrido un error en la búsqueda.";
+                }
+            }
+        };
+        xhr.send();
+    }
+    ///
+      // Función para generar la tabla con los datos recibidos
+      function generateTable(data) {
+            var tableHtml = "<table>";
+            tableHtml += "<tr><th>Domain</th><th>Registrant Code</th><th>Admin Code</th><th>Tech Code</th><th>Creation Date</th><th>Expiration Date</th><th>State</th><th>Domain Protection</th><th>Autorenew</th><th>Actions</th></tr>";
+
+            for (var i = 0; i < data.length; i++) {
+                tableHtml += "<tr>";
+                tableHtml += "<td>" + data[i].domain + "</td>";
+                tableHtml += "<td>" + data[i].registrant_code + "</td>";
+                tableHtml += "<td>" + data[i].admin_code + "</td>";
+                tableHtml += "<td>" + data[i].tech_code + "</td>";
+                tableHtml += "<td>" + formatDate(data[i].creation_date) + "</td>";
+                tableHtml += "<td>" + formatDate(data[i].expiration_date) + "</td>";
+                tableHtml += "<td>" + data[i].state + "</td>";
+                tableHtml += "<td>" + data[i].domain_protection + "</td>";
+                tableHtml += "<td>" + data[i].autorenew + "</td>";
+                tableHtml += "<td>" + getActionButton(data[i].state) + "</td>";
+                tableHtml += "<td><button class='action-button ver' onclick='showDetails(" + JSON.stringify(data[i]) + ")'>Ver</button></td>";
+                tableHtml += "</tr>";
+            }
+
+            tableHtml += "</table>";
+            return tableHtml;
+        }
+
+        // Función para formatear la fecha
+        function formatDate(dateStr) {
+            var date = new Date(dateStr);
+            var options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString(undefined, options);
+        }
+
+        // Función para obtener el botón según el valor de "state"
+        function getActionButton(state) {
+            var buttonText = '';
+            var buttonClass = '';
+            
+            if (state === 'ACTIVATED') {
+                buttonText = 'Transladar';
+                buttonClass = 'transladar';
+            } else if (state === 'REGISTRAR-LOCK') {
+                buttonText = 'Registrar';
+                buttonClass = 'registrar';
+            }
+
+            if (buttonText) {
+                return '<button class="action-button ' + buttonClass + '">' + buttonText + '</button>';
+            }
+
+            return '';
+        }
+</script>
+
+
+</body>
+</html>
